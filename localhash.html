@@ -1,0 +1,140 @@
+<html><head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width">
+	<meta name="referrer" content="no-referrer">
+	<title>localhash - MD5 SHA-1 SHA-256 SHA-512 - mlfaw</title>
+	<meta name="description" content="Hash local files without uploading or installing software. MD5, SHA-1, SHA-256, SHA-512">
+	<link rel="icon" href="/favicon.ico" type="image/x-icon">
+	<!-- table style generated from https://divtable.com/table-styler/ -->
+	<style>
+		table.blueTable {
+		  border: 1px solid #1C6EA4;
+		  background-color: #EEEEEE;
+		  width: 100%;
+		  text-align: left;
+		  border-collapse: collapse;
+		}
+		table.blueTable td, table.blueTable th {
+		  border: 1px solid #AAAAAA;
+		  padding: 2px 2px;
+		}
+		table.blueTable tbody td {
+		  font-size: 14px;
+		}
+		table.blueTable tr:nth-child(even) {
+		  background: #D0E4F5;
+		}
+		table.blueTable thead {
+		  background: #1C6EA4;
+		  background: -moz-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+		  background: -webkit-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+		  background: linear-gradient(to bottom, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+		  border-bottom: 2px solid #444444;
+		}
+		table.blueTable thead th {
+		  font-size: 16px;
+		  font-weight: bold;
+		  color: #FFFFFF;
+		  border-left: 2px solid #D0E4F5;
+		}
+		table.blueTable thead th:first-child {
+		  border-left: none;
+		}
+	</style>
+</head>
+<body>
+	<noscript><div><h1>
+		JavaScript is DISABLED!<br>Enable JavaScript to use this webpage!
+	</h1></div></noscript>
+
+	<h2>File hashing is done entirely within your browser. Nothing is uploaded.</h2>
+
+	<div>
+		<input type="checkbox" id="cbMD5" name="cbMD5">MD5
+		<input type="checkbox" id="cbSHA1" name="cbSHA1">SHA1
+		<input type="checkbox" id="cbSHA256" name="cbSHA256">SHA256
+		<input type="checkbox" id="cbSHA512" name="cbSHA512">SHA512
+		<br>
+		<br>
+		<input type="file" id="iFiles" name="iFiles" multiple>
+	</div>
+
+	<br>
+
+	<table class="blueTable">
+		<thead>
+			<tr>
+				<th>file</th>
+				<!--<th>size</th>-->
+				<!--<th>duration</th>-->
+				<th>hash</th>
+				<th>result</th>
+			</tr>
+		</thead>
+		<tbody id="resultsTable"></tbody>
+	</table>
+
+	<footer>
+		<br><br>Uses the following libraries for hashing: <a href="https://github.com/emn178/js-md5">MD5</a>, <a href="https://github.com/emn178/js-sha1">SHA-1</a>, <a href="https://github.com/emn178/js-sha256">SHA-256</a>, and <a href="https://github.com/emn178/js-sha512">SHA-512</a>
+	</footer>
+
+	<script>
+		// https://jscompress.com/
+		// https://htmlcompressor.com/compressor/
+		// https://kangax.github.io/html-minifier/
+
+		// TODO: Rust digest functions with WASM output to use?
+
+		// use formatBytes() from https://stackoverflow.com/a/18650828 if that's desired...
+
+		function do_hash(hashname, func, file_content, tr, file_name, file_size) {
+			var start = performance.now();
+			var hash = func(file_content);
+			var total = performance.now() - start;
+
+			tr.insertCell().textContent = file_name;
+			//tr.insertCell().textContent = formatBytes(file_size);
+			//tr.insertCell().textContent = total + "ms";
+			tr.insertCell().textContent = hashname;
+			tr.insertCell().textContent = hash;
+		}
+		// haha
+		function stuff(content, file_name, file_size, do_md5, do_sha1, do_sha256, do_sha512) {
+			if (do_md5) do_hash("MD5", md5, content, resultsTable.insertRow(), file_name, file_size);
+			if (do_sha1) do_hash("SHA-1", sha1, content, resultsTable.insertRow(), file_name, file_size);
+			if (do_sha256) do_hash("SHA-256", sha256, content, resultsTable.insertRow(), file_name, file_size);
+			if (do_sha512) do_hash("SHA-512", sha512, content, resultsTable.insertRow(), file_name, file_size);
+		}
+		iFiles.onchange = function(e) {
+			var do_md5 = cbMD5.checked,
+			    do_sha1 = cbSHA1.checked,
+			    do_sha256 = cbSHA256.checked,
+			    do_sha512 = cbSHA512.checked;
+
+			var files = iFiles.files;
+			for (var i = 0; i < files.length; ++i) {
+				var file = files[i];
+				var file_size = file.size;
+				if (!file_size) continue;
+				var file_name = file.name;
+				var reader = new FileReader();
+				reader.onload = function(event) {
+					stuff(
+						new Uint8Array(event.target.result),
+						file_name,
+						file_size,
+						do_md5,
+						do_sha1,
+						do_sha256,
+						do_sha512
+					);
+				}
+				reader.readAsArrayBuffer(file);
+			}
+		}
+	</script>
+	<script src="md5.min.js"></script>
+	<script src="sha1.min.js"></script>
+	<script src="sha256.min.js"></script>
+	<script src="sha512.min.js"></script>
+</body>
