@@ -1,4 +1,4 @@
-# localhash - https://localhash.mlfaw.com/
+# localhash - https://mlfaw.github.io/localhash/
 Produce file hashes in the browser
 - Supported hash and checksum functions: MD5, SHA-1, SHA-256, and SHA-512.
 
